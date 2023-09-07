@@ -1,37 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ToDo
-{
+namespace ToDo;
     internal class Program
     {
-        public static List<string> TL { get; set; }
+        public static List<string> TaskList = new List<string>();
 
         static void Main(string[] args)
-        {
-            TL = new List<string>();
-            int variable = 0;
+        {            
+            int MenuSlected = 0;
             do
             {
-                variable = ShowMainMenu();
-                if (variable == 1)
+                MenuSlected = ShowMainMenu();
+
+                if ((Menu)MenuSlected == Menu.Add)                
                 {
                     ShowMenuAdd();
                 }
-                else if (variable == 2)
+                else if ((Menu) MenuSlected == Menu.Remove)
                 {
-                    ShowMenuDos();
+                    ShowMenuRemove();
                 }
-                else if (variable == 3)
+                else if ((Menu)MenuSlected == Menu.Pending)
                 {
-                    ShowMenuTres();
+                    ShowMenuPending();
                 }
-            } while (variable != 4);
+                else if((Menu)MenuSlected >= Menu.NotValid || (Menu)MenuSlected < Menu.Add  )
+                {
+                    Console.WriteLine("Opción no valida");
+                }                
+            } while ((Menu)MenuSlected != Menu.Exit);
         }
         /// <summary>
-        /// Show the main menu 
+        /// Show the options for task, 1. Add, 2. Remove, 3. Pending, 4. Exit
         /// </summary>
-        /// <returns>Returns option indicated by user</returns>
+        /// <returns>Returns option selected by user</returns>
         public static int ShowMainMenu()
         {
             Console.WriteLine("----------------------------------------");
@@ -40,39 +43,46 @@ namespace ToDo
             Console.WriteLine("2. Remover tarea");
             Console.WriteLine("3. Tareas pendientes");
             Console.WriteLine("4. Salir");
+            Console.WriteLine("----------------------------------------");
 
-            // Read line
-            string line = Console.ReadLine();
-            return Convert.ToInt32(line);
+            string ReadLine = Console.ReadLine();
+            int ConvertReadLine ;
+            bool esEntero = int.TryParse(ReadLine, out ConvertReadLine);
+            if (esEntero)
+            {
+                ConvertReadLine = Convert.ToInt32(ReadLine);
+            }
+            return ConvertReadLine;
         }
 
-        public static void ShowMenuDos()
+        public static void ShowMenuRemove()
         {
             try
             {
-                Console.WriteLine("Ingrese el número de la tarea a remover: ");
-                // Show current taks
-                for (int i = 0; i < TL.Count; i++)
-                {
-                    Console.WriteLine((i + 1) + ". " + TL[i]);
-                }
-                Console.WriteLine("----------------------------------------");
+                Console.WriteLine("Ingrese el número de la tarea a remover: ");                
+                ShowTaskList();             
 
-                string line = Console.ReadLine();
-                // Remove one position
-                int indexToRemove = Convert.ToInt32(line) - 1;
-                if (indexToRemove > -1)
+                string Readline = Console.ReadLine();
+
+                // remove one position becouse the array start in 0
+                int indexToRemove = Convert.ToInt32(Readline) - 1;
+                
+                if( indexToRemove > (TaskList.Count - 1 ) && TaskList.Count < -0 )
                 {
-                    if (TL.Count > 0)
-                    {
-                        string task = TL[indexToRemove];
-                        TL.RemoveAt(indexToRemove);
-                        Console.WriteLine("Tarea " + task + " eliminada");
-                    }
+                    Console.WriteLine("La tarea no existe"); 
+
+                }else if(indexToRemove > -1 && TaskList.Count > 0)
+                {
+                    string SearchTask = TaskList[indexToRemove];
+                    TaskList.RemoveAt(indexToRemove);
+                    Console.WriteLine($"Tarea  {SearchTask} eliminada");
                 }
+
             }
-            catch (Exception)
-            {
+            catch (Exception Error )
+            {       
+                Console.WriteLine("Ha ocurrido un error al remover la tarea ");
+                //Error.Message;     
             }
         }
 
@@ -81,8 +91,8 @@ namespace ToDo
             try
             {
                 Console.WriteLine("Ingrese el nombre de la tarea: ");
-                string task = Console.ReadLine();
-                TL.Add(task);
+                string ReadTask = Console.ReadLine();
+                TaskList.Add(ReadTask);
                 Console.WriteLine("Tarea registrada");
             }
             catch (Exception)
@@ -90,21 +100,34 @@ namespace ToDo
             }
         }
 
-        public static void ShowMenuTres()
+        public static void ShowMenuPending()
         {
-            if (TL == null || TL.Count == 0)
+            if ( TaskList?.Count <= 0)
             {
                 Console.WriteLine("No hay tareas por realizar");
             } 
             else
             {
-                Console.WriteLine("----------------------------------------");
-                for (int i = 0; i < TL.Count; i++)
-                {
-                    Console.WriteLine((i + 1) + ". " + TL[i]);
-                }
-                Console.WriteLine("----------------------------------------");
+                ShowTaskList();
             }
         }
+        public static void ShowTaskList()
+        {
+            int indexTask = 1;
+
+            Console.WriteLine("----------------------------------------");
+
+            TaskList.ForEach(item => Console.WriteLine($"{indexTask++} . {item}"));                
+
+            Console.WriteLine("----------------------------------------");
+        }
     }
-}
+    public enum Menu 
+    {
+        Add = 1,
+        Remove = 2,
+        Pending = 3,
+        Exit = 4,
+        NotValid = 5        
+    }
+
